@@ -107,6 +107,8 @@ window.AYAR = {
 
   /* ---- "Bize Yazın" formu: Apps Script web uygulaması adresi (kurulunca buraya yazılır) ---- */
   BIZE_YAZIN_URL: "https://script.google.com/macros/s/AKfycbyIsXqxX0xrJYGgmJU4AARbBDG2sVZwOKNhFqGZgWR6tHIZvWACIwIi51ZO89HeVsU/exec",
+  // Rapor görüntüleme şifresi: şifrenin kendisi değil SHA-256 özeti. Değiştirmek için README / Claude'a yeni şifreyi verin.
+  RAPOR_SIFRE_OZET: "36b15c90e24bf76495942791b9f10674a930fd812a19af881de3363f8ad9a9da",
   BULTEN_KLASOR: "bulten/",
   BULTEN_API: "https://script.google.com/macros/s/AKfycbxuD5KB2Mnl6jegwSfy3FR08sWTcpLYJWxvKBz3b_Q_g8FbmwLAUCdCnJ991ri4Ln-29A/exec",   // Basın Bülteni Servisi (Google Apps Script) /exec adresi; boşsa bulten/ klasörü okunur
 
@@ -290,6 +292,55 @@ window.VERI = (function(){
            teskilatKayitlari:teskilatKayitlari, egitimKayitlari:egitimKayitlari, stkKayitlari:stkKayitlari, stkVeri:stkVeri, stkAyar:stkAyar, stkKaydet:stkKaydet,
            haftaKaydir:haftaKaydir, buHafta:buHafta, ayEtiket:ayEtiket, donemHaftalari:donemHaftalari,
            KONTROL:KONTROL, kontrol:kontrol, SIMGE:SIMGE, SOSYAL_AD:SOSYAL_AD };
+})();
+
+/* ---------- Rapor görüntüleme şifresi (1. aşama: sayfa kilidi) ----------
+   Şifrenin kendisi kodda tutulmaz; yalnızca SHA-256 özeti (AYAR.RAPOR_SIFRE_OZET) tutulur.
+   Şifre değişince özet değişir ve daha önce şifre girilmiş tüm cihazlardan yeniden şifre istenir. */
+window.YETKI = (function(){
+  var ANAHTAR = "birimRaporlari_yetki";
+  function ozet(metin){
+    var veri = new TextEncoder().encode(metin);
+    return crypto.subtle.digest("SHA-256", veri).then(function(b){ return Array.prototype.map.call(new Uint8Array(b), function(x){ return ("0" + x.toString(16)).slice(-2); }).join(""); });
+  }
+  function acik(){ try { return localStorage.getItem(ANAHTAR) === window.AYAR.RAPOR_SIFRE_OZET; } catch(e){ return false; } }
+  function kilitle(){ try { localStorage.removeItem(ANAHTAR); } catch(e){} }
+  function stil(){
+    if (document.getElementById("yetkiStil")) return;
+    var s = document.createElement("style"); s.id = "yetkiStil";
+    s.textContent = ".yetki-arka{position:fixed;inset:0;background:rgba(29,27,25,.55);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px}" +
+      ".yetki-kutu{background:#fff;border-radius:14px;max-width:360px;width:100%;padding:22px;box-shadow:0 20px 50px rgba(0,0,0,.25);font-family:inherit}" +
+      ".yetki-kutu h3{margin:0 0 6px;font-size:18px;color:#1d1b19}.yetki-kutu p{margin:0 0 14px;color:#7d776f;font-size:14px;line-height:1.45}" +
+      ".yetki-kutu input{width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid #d9d4cd;border-radius:8px;font-size:16px}" +
+      ".yetki-kutu .hata{color:#cd272d;font-size:13px;min-height:18px;margin:6px 0 4px}" +
+      ".yetki-kutu .dugmeler{display:flex;gap:8px;justify-content:flex-end;margin-top:6px}" +
+      ".yetki-kutu button{border:0;border-radius:8px;padding:10px 16px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit}" +
+      ".yetki-kutu .tamam{background:#cd272d;color:#fff}.yetki-kutu .iptal{background:#f1eee9;color:#1d1b19}";
+    document.head.appendChild(s);
+  }
+  /* sec: { baslik, metin, iptalAdres } — iptalAdres verilirse "Vazgeç" o adrese götürür */
+  function iste(sonra, sec){
+    sec = sec || {};
+    if (acik()) { sonra(); return; }
+    stil();
+    var arka = document.createElement("div"); arka.className = "yetki-arka";
+    arka.innerHTML = '<form class="yetki-kutu" autocomplete="off"><h3>' + (sec.baslik || "Rapor verileri") + '</h3><p>' + (sec.metin || "Raporları görmek için il yönetimi şifresini girin.") + '</p>' +
+      '<input type="password" aria-label="Şifre" placeholder="Şifre" autofocus><div class="hata" role="alert"></div>' +
+      '<div class="dugmeler"><button type="button" class="iptal">Vazgeç</button><button type="submit" class="tamam">Giriş</button></div></form>';
+    document.body.appendChild(arka);
+    var f = arka.querySelector("form"), inp = arka.querySelector("input"), hata = arka.querySelector(".hata");
+    setTimeout(function(){ inp.focus(); }, 30);
+    arka.querySelector(".iptal").onclick = function(){ if (sec.iptalAdres) location.href = sec.iptalAdres; else arka.remove(); };
+    f.onsubmit = function(ev){
+      ev.preventDefault();
+      ozet(inp.value).then(function(h){
+        if (h !== window.AYAR.RAPOR_SIFRE_OZET) { hata.textContent = "Şifre hatalı."; inp.select(); return; }
+        try { localStorage.setItem(ANAHTAR, h); } catch(e){}
+        arka.remove(); sonra();
+      });
+    };
+  }
+  return { acik:acik, iste:iste, kilitle:kilitle, ozet:ozet };
 })();
 </script>
 <style>
@@ -967,6 +1018,13 @@ window.VERI = (function(){
   }
   $("yenile").addEventListener("click", hepsi);
   window.addEventListener("storage", function(e){ if (e.key === A.DENEME_ANAHTAR) teslimCiz(); });
+  /* Teslim kartları raporların panolarını açar: şifre ister */
+  $("karolar").addEventListener("click", function(ev){
+    var a = ev.target.closest && ev.target.closest("a.karo"); if (!a || YETKI.acik()) return;
+    ev.preventDefault();
+    var adres = a.href;
+    YETKI.iste(function(){ window.open(adres, "_blank", "noopener"); });
+  });
   hepsi();
   setInterval(raporlariYukle, 5 * 60 * 1000);
   setInterval(function(){ haberler(); bizeYazinKontrol(); }, 30 * 60 * 1000);
