@@ -21,6 +21,24 @@ var ILCE = "Antalya|Muratpaşa|Konyaaltı|Kepez|Döşemealtı|Aksu|Alanya|Manavg
 var R_ANTALYA = new RegExp("antalya|(^|[^a-zçğıöşüâîû])(" + ILCE + ")(?=$|[^a-zçğıöşüâîû])", "i");
 var R_SAADET = /saadet|arıkan|ARIKAN/i;
 
+/* Saadet Partisi mensuplarına uygun olmayan içerik: bu kelimeleri içeren başlıklar ve bu tür kaynaklar bültene alınmaz.
+   Listeye ekleme/çıkarma yapılabilir (küçük harfle yazın). */
+var YASAK_ONEK = ["alkol", "içki", "kumarhane", "kumar", "iddaa", "casino", "kumarhane", "piyango", "astroloji", "magazin",
+  "bikini", "frikik", "dekolte", "transparan", "seksi", "cinsel", "erotik", "porno", "müstehcen", "çıplak", "striptiz",
+  "survivor", "masterchef", "kısmetse", "gelinim olur", "sevgilisi", "öpüş", "aşk itiraf", "iç çamaşır", "playboy", "onlyfans"];
+var YASAK_KELIME = ["bira", "biralar", "rakı", "şarap", "viski", "votka", "kokteyl", "bahis", "burç", "burcu", "burçlar", "fal",
+  "aşk", "dizi", "dizisi", "diziler", "dizide", "şov", "mayo", "mayolu", "+18"];
+var YASAK_KAYNAK = /magazin|kelebek|onedio|elle|vogue|cosmopolitan|ntv magazin|show tv|kanal d|star tv|tv8/i;
+var HARF = "a-zçğıöşüâîû";
+var R_YASAK = new RegExp("(^|[^" + HARF + "])(" + YASAK_ONEK.map(kacis_).join("|") + ")|(^|[^" + HARF + "])(" + YASAK_KELIME.map(kacis_).join("|") + ")(?=$|[^" + HARF + "])");
+function kacis_(x) { return x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+function trKucuk_(x) { return String(x || "").replace(/İ/g, "i").replace(/I/g, "ı").toLowerCase(); }
+function uygunsuz_(baslik, kaynak) {
+  if (YASAK_KAYNAK.test(kaynak || "")) return true;
+  if (/saadet|arıkan|fatih tekin/.test(trKucuk_(baslik))) return false; // partinin bu konulardaki açıklamaları alınır
+  return R_YASAK.test(trKucuk_(baslik));
+}
+
 var BOLUMLER = [
   { baslik: "SAADET PARTİSİ ANTALYA", sinir: 15, uygun: function (b) { return /Fatih Tekin/i.test(b) || (R_SAADET.test(b) && R_ANTALYA.test(b)); }, sorgular: [
       '"Saadet Partisi" Antalya',
@@ -43,7 +61,7 @@ var BOLUMLER = [
 function kurulum() {
   klasor_();
   ScriptApp.getProjectTriggers().forEach(function (t) { if (t.getHandlerFunction() === "topla") ScriptApp.deleteTrigger(t); });
-  ScriptApp.newTrigger("topla").timeBased().everyHours(1).create();
+  ScriptApp.newTrigger("topla").timeBased().everyHours(1).nearMinute(0).create(); // saat başı (Google ±15 dk oynatabilir)
   topla(true);
   Logger.log("Kurulum tamam. Son bülten: " + JSON.stringify(oku_("son.json")).slice(0, 300));
 }
@@ -85,6 +103,7 @@ function topla(zorla) {
     adaylar.forEach(function (a) {
       if (a.t < bas.getTime() || a.t > simdi.getTime() + 600000) return;
       if (tanim.uygun && !tanim.uygun(a.baslik)) return;
+      if (uygunsuz_(a.baslik, a.kaynak)) return;
       var k = anahtar_(a.baslik);
       if (!k || gorulen[k] || gorulen[a.url]) return;
       gorulen[k] = 1; gorulen[a.url] = 1;
