@@ -91,6 +91,7 @@ window.AYAR = {
     ilBaskani: "Mehmet Fatih Tekin",
     adres: "Muratpaşa Mah. 561. Sk. Hasan Bıçakcı İşhanı No: 1/56 Kat: 7 Muratpaşa / Antalya",
     telefon: "+90 530 973 0203",
+    sabit: "+90 242 244 34 66",
     eposta: "antalyasaadet7@gmail.com",
     konum: { ad:"Saadet Partisi Antalya İl Başkanlığı", lat:36.8942554, lng:30.7011112, placeId:"ChIJtbKjMP2PwxQRaJVFbFXFm3s" }
   },
@@ -812,6 +813,7 @@ window.VERI = (function(){
       '<dt>İl Başkanı</dt><dd><b>' + esc(b.ilBaskani) + '</b></dd>' +
       '<dt>Adres</dt><dd>' + esc(b.adres) + '</dd>' +
       '<dt>Telefon</dt><dd><a href="tel:' + esc(telLink) + '">' + esc(tel) + '</a></dd>' +
+      (A.ILETISIM.sabit ? '<dt>Sabit hat</dt><dd><a href="tel:' + esc(String(A.ILETISIM.sabit).replace(/[^\d+]/g, "")) + '">' + esc(A.ILETISIM.sabit) + '</a></dd>' : '') +
       '<dt>E-posta</dt><dd><a href="mailto:' + esc(b.eposta) + '">' + esc(b.eposta) + '</a></dd>';
   }
   function iletisim(){
