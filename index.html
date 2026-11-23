@@ -679,7 +679,7 @@ window.VERI = (function(){
     var hataMi = { teskilat:!!R.tHata, egitim:!!R.eHata, stk:!!R.sHata };
     var birimHaftalari = {}, birimKayit = {};
     A.BIRIMLER.forEach(function(b){
-      var l = veri[b.k] || [], bas = ilkHafta(l) || V.buHafta();
+      var l = veri[b.k] || [], bas = ilkHafta(l) || (D.mod === "hafta" ? D.anahtar : V.buHafta());
       var hs = V.donemHaftalari(D.mod, D.anahtar, bas);
       birimHaftalari[b.k] = hs;
       birimKayit[b.k] = l.filter(function(r){ return hs.indexOf(r.hafta) >= 0 && ILCELER.indexOf(r.ilce) >= 0; });
@@ -693,7 +693,7 @@ window.VERI = (function(){
       var ilceSay = {}; ks.forEach(function(r){ ilceSay[r.ilce] = 1; }); var ilce = Object.keys(ilceSay).length;
       if (D.mod === "hafta") {
         var y = Math.round(ilce / N * 100);
-        h += '<a class="karo vurgu" href="' + esc(b.pano || "detay.html#" + b.k) + '" target="_blank" rel="noopener" title="Panoyu yeni sekmede aç"><div class="ad">' + esc(b.ad) + et + '</div><div class="deger">' + ilce + ' <small>/ ' + N + '</small></div><div class="alt">Rapor gönderen ilçe · %' + y + '</div><div class="ilerleme"><i style="width:' + y + '%"></i></div></a>';
+        h += '<a class="karo vurgu" href="' + esc(b.pano || "detay.html#" + b.k) + '" target="_blank" rel="noopener" title="Panoyu yeni sekmede aç"><div class="ad">' + esc(b.ad) + et + '</div><div class="deger">' + ilce + ' <small>/ ' + N + '</small></div><div class="alt">' + (l.length ? 'Rapor gönderen ilçe · %' + y : 'Henüz rapor girilmedi') + '</div><div class="ilerleme"><i style="width:' + y + '%"></i></div></a>';
       } else {
         var bek = N * hs.length, y2 = Math.round(ks.length / bek * 100);
         h += '<a class="karo vurgu" href="' + esc(b.pano || "detay.html#" + b.k) + '" target="_blank" rel="noopener" title="Panoyu yeni sekmede aç"><div class="ad">' + esc(b.ad) + et + '</div><div class="deger">' + ks.length + ' <small>/ ' + bek + '</small></div><div class="alt">Teslim edilen haftalık rapor · %' + y2 + ' · ' + hs.length + ' hafta · ' + ilce + ' ilçe en az bir kez</div><div class="ilerleme"><i style="width:' + y2 + '%"></i></div></a>';
