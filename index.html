@@ -108,6 +108,7 @@ window.AYAR = {
   /* ---- "Bize Yazın" formu: Apps Script web uygulaması adresi (kurulunca buraya yazılır) ---- */
   BIZE_YAZIN_URL: "https://script.google.com/macros/s/AKfycbyIsXqxX0xrJYGgmJU4AARbBDG2sVZwOKNhFqGZgWR6tHIZvWACIwIi51ZO89HeVsU/exec",
   BULTEN_KLASOR: "bulten/",
+  BULTEN_API: "https://script.google.com/macros/s/AKfycbxuD5KB2Mnl6jegwSfy3FR08sWTcpLYJWxvKBz3b_Q_g8FbmwLAUCdCnJ991ri4Ln-29A/exec",   // Basın Bülteni Servisi (Google Apps Script) /exec adresi; boşsa bulten/ klasörü okunur
 
   /* ---- Ana sayfa teslim kartları: yeni birim eklendiğinde buraya eklenir ---- */
   BIRIMLER: [
@@ -897,7 +898,10 @@ window.VERI = (function(){
 
   /* ---- günlük basın bülteni ---- */
   var BLT = { son:null, arsiv:[], secili:null, cache:{} };
-  function bultenGetir(dosya){ return V.getir(A.BULTEN_KLASOR + dosya + "?_=" + Date.now(), { cache:"no-store" }).then(function(r){ return r.json(); }); }
+  function bultenGetir(dosya){
+    var url = A.BULTEN_API ? A.BULTEN_API + "?dosya=" + encodeURIComponent(dosya) + "&_=" + Date.now() : A.BULTEN_KLASOR + dosya + "?_=" + Date.now();
+    return V.getir(url, A.BULTEN_API ? {} : { cache:"no-store" }).then(function(r){ return r.json(); }).then(function(j){ if (j && j.hata) throw new Error(j.hata === "yok" ? "404" : j.hata); return j; });
+  }
   function saatYaz(iso){ var d = new Date(iso); return isNaN(d) ? "" : O.pad(d.getHours()) + "." + O.pad(d.getMinutes()); }
   function bultenCiz(b, guncel){
     var h = '<div class="ust"><b>' + esc(b.tarih || b.gun) + '</b><span class="meta">Tarama: ' + esc(b.donem || "") + (guncel && b.guncelleme ? ' · Son güncelleme ' + saatYaz(b.guncelleme) : '') + '</span><div class="eylem">' +
@@ -934,10 +938,10 @@ window.VERI = (function(){
     };
   }
   function bultenKontrol(b){
-    var simdi = new Date(), bugun = O.ymd(simdi), saat = simdi.getHours() + simdi.getMinutes() / 60, ad = "Günlük Basın Bülteni (zamanlanmış görev)";
+    var simdi = new Date(), bugun = O.ymd(simdi), saat = simdi.getHours() + simdi.getMinutes() / 60, ad = "Günlük Basın Bülteni (Google Haberler servisi)";
     var adet = (b.bolumler || []).reduce(function(n, x){ return n + (x.haberler || []).length; }, 0);
     if (b.gun !== bugun) {
-      if (saat >= 8.5) V.kontrol("bulten", ad, "uyari", "Bugünün sabah bülteni henüz yayınlanmadı · son bülten: " + (b.tarih || b.gun));
+      if (saat >= 8.5) V.kontrol("bulten", ad, "uyari", "Bugünün bülteni henüz oluşmadı · son bülten: " + (b.tarih || b.gun));
       else V.kontrol("bulten", ad, "ok", "Son bülten: " + (b.tarih || b.gun) + " · bugünkü bülten 08.00'de");
       return;
     }
@@ -953,8 +957,8 @@ window.VERI = (function(){
       return bultenGetir("arsiv.json").then(function(l){ BLT.arsiv = Array.isArray(l) ? l : []; if (!BLT.secili || BLT.secili === b.gun) bultenCiz(b, true); }).catch(function(){});
     }).catch(function(e){
       var yok = /404/.test(e.message);
-      $("bulten").innerHTML = '<div class="liste"><p class="bos-mesaj" style="padding-top:14px">' + (yok ? 'Bülten henüz yayınlanmadı. Sabah bülteni her gün 08.00\'de, gün içi güncellemeler 09.00–23.00 arasında saat başı burada görünür.' : 'Bülten şu an okunamadı.') + '</p></div>';
-      V.kontrol("bulten", "Günlük Basın Bülteni (zamanlanmış görev)", yok ? "uyari" : "hata", yok ? "Henüz yayınlanmış bülten yok (bulten/son.json bulunamadı)" : "Okunamadı: " + e.message);
+      $("bulten").innerHTML = '<div class="liste"><p class="bos-mesaj" style="padding-top:14px">' + (yok ? 'Bülten henüz yayınlanmadı. Haberler 08.00–23.00 arasında saat başı burada güncellenir.' : 'Bülten şu an okunamadı.') + '</p></div>';
+      V.kontrol("bulten", "Günlük Basın Bülteni (Google Haberler servisi)", yok ? "uyari" : "hata", yok ? "Henüz yayınlanmış bülten yok (bulten/son.json bulunamadı)" : "Okunamadı: " + e.message);
     });
   }
 
