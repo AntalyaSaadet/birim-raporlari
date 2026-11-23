@@ -381,7 +381,7 @@ window.VERI = (function(){
       <p>Saadet Partisi Antalya İl Başkanlığı · Haftalık birim raporları</p>
     </div>
     <div class="bos"></div>
-    <label class="anahtar" title="Deneme modunda kayıtlar gerçek tablolara gitmez">
+    <label class="anahtar" hidden style="display:none" title="Deneme modunda kayıtlar gerçek tablolara gitmez">
       <input type="checkbox" id="denemeAnahtar"><span class="ray"></span><span>Deneme modu</span>
     </label>
   </div>
@@ -493,7 +493,8 @@ window.VERI = (function(){
   $("kredi").textContent = A.KREDI;
 
   /* ---------- deneme modu ---------- */
-  function denemeMi(){ try { var v = localStorage.getItem("birimRaporlari_denemeModu"); if (v !== null) return v === "1"; } catch(e){} return !!A.VARSAYILAN_DENEME; }
+  var DENEME_GORUNUR = false; /* deneme anahtarı şimdilik gizli; açmak için true yapın */
+  function denemeMi(){ if (!DENEME_GORUNUR) return false; try { var v = localStorage.getItem("birimRaporlari_denemeModu"); if (v !== null) return v === "1"; } catch(e){} return !!A.VARSAYILAN_DENEME; }
   function denemeAyarla(acik){
     try { localStorage.setItem("birimRaporlari_denemeModu", acik ? "1" : "0"); } catch(e){}
     $("denemeAnahtar").checked = acik;
