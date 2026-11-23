@@ -17,17 +17,21 @@ var TZ = "Europe/Istanbul";
 var KLASOR_ADI = "Basın Bülteni (site verisi) · Saadet Antalya";
 var SAKLA_GUN = 60;
 
+var ILCE = "Antalya|Muratpaşa|Konyaaltı|Kepez|Döşemealtı|Aksu|Alanya|Manavgat|Serik|Kemer|Kumluca|Finike|Kaş|Demre|Elmalı|Korkuteli|Gazipaşa|Gündoğmuş|İbradı|Akseki";
+var R_ANTALYA = new RegExp("antalya|(^|[^a-zçğıöşüâîû])(" + ILCE + ")(?=$|[^a-zçğıöşüâîû])", "i");
+var R_SAADET = /saadet|arıkan|ARIKAN/i;
+
 var BOLUMLER = [
-  { baslik: "SAADET PARTİSİ ANTALYA", sinir: 15, sorgular: [
+  { baslik: "SAADET PARTİSİ ANTALYA", sinir: 15, uygun: function (b) { return /Fatih Tekin/i.test(b) || (R_SAADET.test(b) && R_ANTALYA.test(b)); }, sorgular: [
       '"Saadet Partisi" Antalya',
       '"Mehmet Fatih Tekin"',
       '"Saadet Partisi" (Alanya OR Manavgat OR Kepez OR Muratpaşa OR Konyaaltı OR Serik OR Kumluca OR Aksu OR Döşemealtı OR Gazipaşa OR Finike OR Kemer)'
   ]},
-  { baslik: "SAADET PARTİSİ GENEL MERKEZ", sinir: 8, sorgular: [
+  { baslik: "SAADET PARTİSİ GENEL MERKEZ", sinir: 8, uygun: function (b) { return R_SAADET.test(b); }, sorgular: [
       '"Mahmut Arıkan"',
       '"Saadet Partisi"'
   ]},
-  { baslik: "ANTALYA YEREL GÜNDEMİ", sinir: 10, sorgular: [
+  { baslik: "ANTALYA YEREL GÜNDEMİ", sinir: 10, uygun: function (b) { return R_ANTALYA.test(b); }, sorgular: [
       '"Antalya Büyükşehir"',
       'Antalya Valiliği OR "Antalya Valisi"',
       'Antalya'
@@ -42,6 +46,13 @@ function kurulum() {
   ScriptApp.newTrigger("topla").timeBased().everyHours(1).create();
   topla(true);
   Logger.log("Kurulum tamam. Son bülten: " + JSON.stringify(oku_("son.json")).slice(0, 300));
+}
+
+/* Bugünün bültenini sıfırlayıp yeniden toplar (gerektiğinde elle çalıştırılır) */
+function bugunuYenile() {
+  sil_("arsiv/" + Utilities.formatDate(new Date(), TZ, "yyyy-MM-dd") + ".json");
+  topla(true);
+  Logger.log(JSON.stringify(oku_("son.json")).slice(0, 1500));
 }
 
 /* ---------------- toplama ---------------- */
@@ -73,6 +84,7 @@ function topla(zorla) {
     var yeni = [];
     adaylar.forEach(function (a) {
       if (a.t < bas.getTime() || a.t > simdi.getTime() + 600000) return;
+      if (tanim.uygun && !tanim.uygun(a.baslik)) return;
       var k = anahtar_(a.baslik);
       if (!k || gorulen[k] || gorulen[a.url]) return;
       gorulen[k] = 1; gorulen[a.url] = 1;
