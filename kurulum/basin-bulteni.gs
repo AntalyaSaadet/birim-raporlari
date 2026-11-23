@@ -25,9 +25,11 @@ var R_SAADET = /saadet|arıkan|ARIKAN/i;
    Listeye ekleme/çıkarma yapılabilir (küçük harfle yazın). */
 var YASAK_ONEK = ["alkol", "içki", "kumarhane", "kumar", "iddaa", "casino", "kumarhane", "piyango", "astroloji", "magazin",
   "bikini", "frikik", "dekolte", "transparan", "seksi", "cinsel", "erotik", "porno", "müstehcen", "çıplak", "striptiz",
-  "survivor", "masterchef", "kısmetse", "gelinim olur", "sevgilisi", "öpüş", "aşk itiraf", "iç çamaşır", "playboy", "onlyfans"];
+  "survivor", "masterchef", "kısmetse", "gelinim olur", "güldür güldür", "dizi oyuncu", "dizisinin", "dizinin", "sezon finali",
+  "reyting", "ünlü oyuncu", "ünlü şarkıcı", "ünlü sunucu", "ünlü çift", "aşk yaşa", "ayrılık", "boşan", "nikah masas", "düğün fotoğraf", "kırmızı halı",
+  "uzak şehir", "yalı çapkını", "kızılcık şerbeti", "teşkilat dizi", "kuruluş osman", "sevgilisi", "öpüş", "aşk itiraf", "iç çamaşır", "playboy", "onlyfans"];
 var YASAK_KELIME = ["bira", "biralar", "rakı", "şarap", "viski", "votka", "kokteyl", "bahis", "burç", "burcu", "burçlar", "fal",
-  "aşk", "dizi", "dizisi", "diziler", "dizide", "şov", "mayo", "mayolu", "+18"];
+  "aşk", "dizi", "dizisi", "diziler", "dizide", "show", "talk show", "şov", "mayo", "mayolu", "+18"];
 var YASAK_KAYNAK = /magazin|kelebek|onedio|elle|vogue|cosmopolitan|ntv magazin|show tv|kanal d|star tv|tv8/i;
 var HARF = "a-zçğıöşüâîû";
 var R_YASAK = new RegExp("(^|[^" + HARF + "])(" + YASAK_ONEK.map(kacis_).join("|") + ")|(^|[^" + HARF + "])(" + YASAK_KELIME.map(kacis_).join("|") + ")(?=$|[^" + HARF + "])");
@@ -54,7 +56,7 @@ var BOLUMLER = [
       'Antalya Valiliği OR "Antalya Valisi"',
       'Antalya'
   ]},
-  { baslik: "TÜRKİYE GÜNDEMİ", sinir: 8, sorgular: [ null ] } // null = Google Haberler Türkiye manşetleri
+  { baslik: "TÜRKİYE GÜNDEMİ", sinir: 8, sorgular: [ null ] } // null = Google Haberler "Türkiye" bölümü
 ];
 
 /* ---------------- kurulum ---------------- */
@@ -127,7 +129,7 @@ function topla(zorla) {
 
 function rss_(q) {
   var url = q === null
-    ? "https://news.google.com/rss?hl=tr&gl=TR&ceid=TR:tr"
+    ? "https://news.google.com/rss/headlines/section/topic/NATION?hl=tr&gl=TR&ceid=TR:tr"
     : "https://news.google.com/rss/search?q=" + encodeURIComponent(q + " when:2d") + "&hl=tr&gl=TR&ceid=TR:tr";
   try {
     var r = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
