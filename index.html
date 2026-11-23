@@ -406,19 +406,16 @@ window.VERI = (function(){
   .arsiv .kucuk{width:56px;height:40px;border-radius:6px;background:#eee9e3 center/cover no-repeat;flex:none}
   .arsiv b{display:block;font-size:13.5px;line-height:1.3}
   .arsiv small{color:var(--soluk);font-size:12px}
-  .ahlak{display:grid;grid-template-columns:1fr 1.15fr;align-items:center;gap:24px;text-decoration:none;border-radius:16px;padding:26px 36px;color:#f6e6c8;background-color:#6b1c34;background-image:linear-gradient(45deg,rgba(255,255,255,.05) 25%,transparent 25%,transparent 75%,rgba(255,255,255,.05) 75%),linear-gradient(45deg,rgba(255,255,255,.05) 25%,transparent 25%,transparent 75%,rgba(255,255,255,.05) 75%),linear-gradient(135deg,rgba(0,0,0,.08) 25%,transparent 25%,transparent 75%,rgba(0,0,0,.08) 75%);background-size:52px 52px,52px 52px,26px 26px;background-position:0 0,26px 26px,0 0}
-  .ahlak .yazi{display:flex;flex-direction:column;align-items:center;line-height:.95;font-family:"Arial Black",Impact,"Segoe UI",Arial,sans-serif;font-weight:900;text-align:center}
-  .ahlak .s1{font-size:34px;letter-spacing:3px;color:#f6e6c8}
-  .ahlak .s2{font-size:70px;letter-spacing:2px;color:#f5a623;transform:skewX(-6deg);margin:4px 0;text-shadow:0 3px 0 rgba(0,0,0,.18)}
-  .ahlak .sag{display:flex;flex-direction:column;align-items:flex-start;gap:16px}
-  .ahlak .rozet{background:#8d2d4d;color:#f6e6c8;font-weight:900;letter-spacing:1.5px;padding:7px 14px;border-radius:3px;font-size:17px;box-shadow:0 0 0 2px rgba(246,230,200,.08)}
-  .ahlak .alt{display:flex;align-items:center;gap:18px;flex-wrap:wrap;width:100%}
-  .ahlak .dugme{background:#f5a623;color:#3a0e1b;font-weight:800;border-radius:26px;padding:12px 22px;display:inline-flex;align-items:center;gap:34px;font-size:15px;transition:.15s}
+  .ahlak{display:flex;align-items:center;gap:22px;text-decoration:none;border-radius:14px;padding:10px 24px;color:#f6e6c8;background-color:#6b1c34;background-image:linear-gradient(45deg,rgba(255,255,255,.05) 25%,transparent 25%,transparent 75%,rgba(255,255,255,.05) 75%),linear-gradient(45deg,rgba(255,255,255,.05) 25%,transparent 25%,transparent 75%,rgba(255,255,255,.05) 75%),linear-gradient(135deg,rgba(0,0,0,.08) 25%,transparent 25%,transparent 75%,rgba(0,0,0,.08) 75%);background-size:40px 40px,40px 40px,20px 20px;background-position:0 0,20px 20px,0 0}
+  .ahlak .ahlak-logo{display:block;width:170px;height:auto;flex:0 0 auto}
+  .ahlak .sag{display:flex;align-items:center;gap:16px;flex:1;min-width:0}
+  .ahlak .rozet{background:#8d2d4d;color:#f6e6c8;font-weight:900;letter-spacing:1.2px;padding:5px 11px;border-radius:3px;font-size:13px;white-space:nowrap}
+  .ahlak .alt{display:flex;align-items:center;gap:16px;margin-left:auto}
+  .ahlak .dugme{background:#f5a623;color:#3a0e1b;font-weight:800;border-radius:22px;padding:8px 16px;display:inline-flex;align-items:center;gap:14px;font-size:14px;white-space:nowrap;transition:.15s}
   .ahlak:hover .dugme{background:#ffb93f}
-  .ahlak .tarih{letter-spacing:4px;font-size:12.5px;font-weight:800;color:#f6e6c8;margin-left:auto}
+  .ahlak .tarih{letter-spacing:3px;font-size:11.5px;font-weight:800;color:#f6e6c8;white-space:nowrap}
   .ahlak:focus-visible{outline:3px solid var(--kirmizi);outline-offset:3px}
-  .ahlak .ahlak-logo{display:block;width:100%;max-width:420px;height:auto;margin:0 auto}
-  @media (max-width:760px){ .ahlak{grid-template-columns:1fr;padding:22px} .ahlak .sag{align-items:center} .ahlak .tarih{margin-left:0} .ahlak .s2{font-size:56px} }
+  @media (max-width:760px){ .ahlak{padding:8px 14px;gap:12px} .ahlak .ahlak-logo{width:110px} .ahlak .rozet,.ahlak .tarih{display:none} .ahlak .dugme{padding:7px 13px;font-size:13px;gap:8px} }
   .cipler{display:flex;flex-wrap:wrap;gap:6px}
   .cipler a{font-size:12.5px;border:1px solid var(--cizgi);background:#fff;border-radius:20px;padding:5px 10px;text-decoration:none;color:var(--yazi2)}
   .cipler a:hover{border-color:var(--kirmizi);color:var(--kirmizi)}
