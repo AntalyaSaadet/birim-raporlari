@@ -110,6 +110,7 @@ window.AYAR = {
   // Rapor görüntüleme şifresi: şifrenin kendisi değil SHA-256 özeti. Değiştirmek için README / Claude'a yeni şifreyi verin.
   RAPOR_SIFRE_OZET: "36b15c90e24bf76495942791b9f10674a930fd812a19af881de3363f8ad9a9da",
   BULTEN_KLASOR: "bulten/",
+  ZIYARET_API: "https://script.google.com/macros/s/AKfycbyI195xjrZmVcUb9x-xpEGF7WrGIyU1sIKCH_nJMv98PulitJ8h-lWlBBsh4XGiiBtruw/exec",  // Ziyaret Kayıt Servisi (Google Apps Script) /exec adresi; boşsa ziyaret kaydı tutulmaz
   BULTEN_API: "https://script.google.com/macros/s/AKfycbxuD5KB2Mnl6jegwSfy3FR08sWTcpLYJWxvKBz3b_Q_g8FbmwLAUCdCnJ991ri4Ln-29A/exec",   // Basın Bülteni Servisi (Google Apps Script) /exec adresi; boşsa bulten/ klasörü okunur
 
   /* ---- Ana sayfa teslim kartları: yeni birim eklendiğinde buraya eklenir ---- */
@@ -341,6 +342,130 @@ window.YETKI = (function(){
     };
   }
   return { acik:acik, iste:iste, kilitle:kilitle, ozet:ozet };
+})();
+
+/* ---------- Ziyaretçi istatistikleri (isimsiz) ----------
+   Kayıt: sayfa görüntüleme, bölüm görünme ve süreleri, tıklamalar, geliş kaynağı, cihaz türü.
+   Kişi adı, IP ya da konum kaydedilmez. Ziyaretçi numarası rastgele üretilir ve yalnızca bu cihazda tutulur.
+   Bir cihazda izlemeyi kapatmak için adresin sonuna ?izleme=kapat eklenir (açmak için ?izleme=ac). */
+window.IZLEME = (function(){
+  var A = window.AYAR || {}, URL_ = A.ZIYARET_API, ZK = "birimRaporlari_ziyaretci", OK = "birimRaporlari_oturum", KAPALI = "birimRaporlari_izlemeKapali";
+  var SAYFA = { "": "Ana sayfa", "index.html": "Ana sayfa", "giris.html": "Rapor giriş paneli", "detay.html": "Ayrıntılı rapor", "belgeler.html": "Parti belgeleri" };
+  var kuyruk = [], bolum = {}, sayfaSure = 0, gorunurBas = null, z, o, kaynak = "", cihaz = "";
+  function rasgele(){ return Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4); }
+  function ls(k, v){ try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch(e){ return null; } }
+  function kaynakBul(){
+    var p = new URLSearchParams(location.search), k = (p.get("k") || p.get("utm_source") || "").toLowerCase();
+    var r = ""; try { r = document.referrer ? new URL(document.referrer).hostname.toLowerCase() : ""; } catch(e){}
+    var s = k + " " + r;
+    if (r && r === location.hostname && !k) return "";   // site içi geçiş: yeni kaynak değil
+    if (/whatsapp|wa\.me/.test(s)) return "WhatsApp";
+    if (/facebook|fb\.com|fb\b/.test(s)) return "Facebook";
+    if (/instagram/.test(s)) return "Instagram";
+    if (/t\.co\b|twitter|x\.com|\bx\b/.test(s)) return "X (Twitter)";
+    if (/youtube|youtu\.be/.test(s)) return "YouTube";
+    if (/tiktok/.test(s)) return "TikTok";
+    if (/telegram|t\.me/.test(s)) return "Telegram";
+    if (/google/.test(s)) return "Google";
+    if (/bing|yandex|duckduckgo|yahoo/.test(s)) return "Diğer arama motoru";
+    if (/saadet\.org\.tr/.test(s)) return "saadet.org.tr";
+    if (k) return k.slice(0, 30);
+    if (r) return "Diğer site";
+    return "Doğrudan (adres / uygulama içi bağlantı)";
+  }
+  function cihazBul(){ var u = navigator.userAgent; return /iPad|Tablet|Android(?!.*Mobile)/i.test(u) ? "Tablet" : /Mobi|iPhone|Android/i.test(u) ? "Telefon" : "Bilgisayar"; }
+  function oturum(){
+    var simdi = Date.now(), v = {}; try { v = JSON.parse(ls(OK) || "{}"); } catch(e){}
+    var kb = kaynakBul();
+    if (!v.id || simdi - (v.son || 0) > 30 * 60 * 1000 || (kb && kb !== v.k && kb !== "Doğrudan (adres / uygulama içi bağlantı)")) {
+      v = { id:rasgele(), k:kb || "Doğrudan (adres / uygulama içi bağlantı)", yeni:1 };
+    }
+    v.son = simdi; ls(OK, JSON.stringify({ id:v.id, k:v.k, son:v.son }));
+    return v;
+  }
+  function ekle(t, ad, sure, yeni){ kuyruk.push({ t:t, a:ad || "", s:Math.round(sure || 0), y:yeni ? 1 : 0 }); }
+  function gonder(){
+    if (!kuyruk.length) return;
+    var veri = JSON.stringify({ z:z, o:o.id, p:SAYFA[(location.pathname.split("/").pop() || "")] || location.pathname.split("/").pop(), k:o.k, yo:o.yeni ? 1 : 0, c:cihaz, e:kuyruk.splice(0, 80) });
+    o.yeni = 0;
+    try { if (navigator.sendBeacon && navigator.sendBeacon(URL_, new Blob([veri], { type:"text/plain;charset=utf-8" }))) return; } catch(e){}
+    try { fetch(URL_, { method:"POST", mode:"no-cors", keepalive:true, headers:{ "Content-Type":"text/plain;charset=utf-8" }, body:veri }); } catch(e){}
+  }
+  function sureyiTopla(){
+    var simdi = Date.now();
+    if (gorunurBas) { sayfaSure += (simdi - gorunurBas) / 1000; gorunurBas = simdi; }
+    Object.keys(bolum).forEach(function(ad){ var b = bolum[ad]; if (b.bas) { b.sure += (simdi - b.bas) / 1000; b.bas = simdi; } });
+  }
+  function bosalt(){
+    sureyiTopla();
+    if (sayfaSure >= 1) ekle("sure", "", sayfaSure); sayfaSure = 0;
+    Object.keys(bolum).forEach(function(ad){ var b = bolum[ad]; if (b.sure >= 1 || b.yeni) ekle("bolum", ad, b.sure, b.yeni); b.sure = 0; b.yeni = false; });
+    gonder();
+  }
+  function tikAdi(a){
+    var h = a.getAttribute("href") || "", ic = function(s){ return a.closest(s); };
+    if (a.id === "uyeOl") return "Üye Ol";
+    if (a.classList.contains("karo")) return "Rapor panosu";
+    if (a.classList.contains("ahlak")) return "Ahlak Manifestosu";
+    if (ic("#haberler") || a.id === "haberlerTum") return "Haber (Gündem)";
+    if (ic("#bulten")) return "Basın bülteni haberi";
+    if (ic("#arsiv") || a.id === "arsivTum") return "Dosya arşivi";
+    if (ic("#cozer") || a.id === "cozerTum") return "Saadet Çözer";
+    if (ic(".belge-kartlar") || /belgeler\.html/.test(h)) return "Parti belgeleri";
+    if (/\.pdf(\?|$)/i.test(h)) return "PDF";
+    if (/facebook\.com/i.test(h)) return "Sosyal medya · Facebook";
+    if (/instagram\.com/i.test(h)) return "Sosyal medya · Instagram";
+    if (/(x|twitter)\.com/i.test(h)) return "Sosyal medya · X";
+    if (/youtube\.com|youtu\.be/i.test(h)) return "Sosyal medya · YouTube";
+    if (/tiktok\.com/i.test(h)) return "Sosyal medya · TikTok";
+    if (/^tel:/i.test(h)) return "Telefon arama";
+    if (/^mailto:/i.test(h)) return "E-posta";
+    if (/google\.[^/]+\/maps|maps\.google|goo\.gl\/maps/i.test(h)) return "Harita / yol tarifi";
+    if (/giris\.html/.test(h)) return "Rapor gir";
+    if (/detay\.html/.test(h)) return "Ayrıntılı rapor";
+    if (/^https?:/i.test(h) && a.hostname !== location.hostname) return "Diğer dış bağlantı";
+    return "";
+  }
+  function baslat(){
+    if (!URL_ || navigator.webdriver) return;
+    var p = new URLSearchParams(location.search).get("izleme");
+    if (p === "kapat") ls(KAPALI, "1"); else if (p === "ac") ls(KAPALI, null);
+    if (ls(KAPALI) === "1") return;
+    z = ls(ZK); if (!z) { z = rasgele(); ls(ZK, z); }
+    o = oturum(); cihaz = cihazBul();
+    ekle("sayfa", "", 0, o.yeni);
+    gorunurBas = document.visibilityState === "visible" ? Date.now() : null;
+    gonder();
+    if ("IntersectionObserver" in window) {
+      var gozcu = new IntersectionObserver(function(l){
+        l.forEach(function(g){
+          var ad = g.target.getAttribute("data-bolum"), b = bolum[ad] || (bolum[ad] = { sure:0, bas:null, yeni:false, goruldu:false });
+          if (g.isIntersecting && document.visibilityState === "visible") { if (!b.goruldu) { b.goruldu = true; b.yeni = true; } if (!b.bas) b.bas = Date.now(); }
+          else if (b.bas) { b.sure += (Date.now() - b.bas) / 1000; b.bas = null; }
+        });
+      }, { threshold:0.4 });
+      document.querySelectorAll("[data-bolum]").forEach(function(el){ gozcu.observe(el); });
+    }
+    document.addEventListener("click", function(ev){
+      var a = ev.target.closest && ev.target.closest("a[href]"); if (!a) return;
+      var ad = tikAdi(a); if (ad) { ekle("tik", ad); if (a.target === "_blank" || a.hostname !== location.hostname || /^(tel|mailto):/i.test(a.getAttribute("href") || "")) bosalt(); }
+    }, true);
+    document.addEventListener("submit", function(ev){ if (ev.target && ev.target.id === "bizeYazin") ekle("tik", "Bize Yazın formu gönderildi"); }, true);
+    document.addEventListener("visibilitychange", function(){
+      if (document.visibilityState === "hidden") {
+        bosalt(); gorunurBas = null;
+        Object.keys(bolum).forEach(function(ad){ bolum[ad].bas = null; });
+      } else {
+        gorunurBas = Date.now();
+        try { var v = JSON.parse(ls(OK) || "{}"); v.son = Date.now(); ls(OK, JSON.stringify(v)); } catch(e){}
+      }
+    });
+    window.addEventListener("pagehide", bosalt);
+    setInterval(function(){ if (document.visibilityState === "visible") { sureyiTopla(); try { var v = JSON.parse(ls(OK) || "{}"); v.son = Date.now(); ls(OK, JSON.stringify(v)); } catch(e){} } }, 30000);
+  }
+  function getirOzet(gun){ return fetch(URL_ + "?islem=ozet&gun=" + (gun || 30) + "&_=" + Date.now()).then(function(r){ return r.json(); }); }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", baslat); else baslat();
+  return { ozet:getirOzet, gonder:bosalt };
 })();
 </script>
 <style>
