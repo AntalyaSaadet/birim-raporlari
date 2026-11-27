@@ -74,6 +74,7 @@ window.AYAR = {
   /* ---- saadet.org.tr (resmî site) — içerik buradan canlı okunur ---- */
   SITE: "https://www.saadet.org.tr",
   SITE_API: "https://admin.saadet.org.tr/veriler/api.php",
+  BELGE_VERI: "belgeler-veri.json",  // Parti Programı, Tüzük ve Saadet Çözer'in sitemizdeki kopyası
   SITE_RESIM: "https://admin.saadet.org.tr/resimler/",
   IL_ID: 7, /* Antalya plaka kodu — il başkanlığı bilgileri */
   BAGLANTI: {
@@ -190,7 +191,24 @@ window.VERI = (function(){
   }
 
   /* ---- resmî site API ---- */
+  /* Parti Programı, Tüzük ve Saadet Çözer başlıkları sitemizdeki kopyadan (belgeler-veri.json) okunur;
+     kopya okunamazsa saadet.org.tr'den canlı okunur. */
+  var YEREL = { program_kategori:1, tuzuk_kategori:1, program:1, tuzuk:1, saadet_cozer_kategori:1 }, _belge = null;
+  function belge(){
+    if (!_belge) _belge = getir(A.BELGE_VERI + "?_=" + Math.floor(Date.now() / 3600000)).then(function(r){ return r.json(); });
+    return _belge;
+  }
   function site(kaynak, param){
+    if (YEREL[kaynak] && A.BELGE_VERI) {
+      return belge().then(function(b){
+        var v = (kaynak === "program" || kaynak === "tuzuk") ? (b[kaynak] || {})[String((param || {}).kategori)] : b[kaynak];
+        if (!Array.isArray(v) || !v.length) throw new Error("kopyada yok");
+        return v;
+      }).catch(function(){ return canli(kaynak, param); });
+    }
+    return canli(kaynak, param);
+  }
+  function canli(kaynak, param){
     var p = new URLSearchParams(); p.set("resource", kaynak);
     Object.keys(param || {}).forEach(function(k){ p.set(k, param[k]); });
     return getir(A.SITE_API + "?" + p.toString()).then(function(r){ return r.json(); }).then(function(j){
@@ -289,7 +307,7 @@ window.VERI = (function(){
   };
   var SOSYAL_AD = { facebook:"Facebook", x:"X", instagram:"Instagram", youtube:"YouTube", tiktok:"TikTok" };
 
-  return { getir:getir, site:site, varlikCoz:varlikCoz, temizHtml:temizHtml, tarihUnix:tarihUnix, baslikHarf:baslikHarf,
+  return { getir:getir, site:site, belge:belge, varlikCoz:varlikCoz, temizHtml:temizHtml, tarihUnix:tarihUnix, baslikHarf:baslikHarf,
            teskilatKayitlari:teskilatKayitlari, egitimKayitlari:egitimKayitlari, stkKayitlari:stkKayitlari, stkVeri:stkVeri, stkAyar:stkAyar, stkKaydet:stkKaydet,
            haftaKaydir:haftaKaydir, buHafta:buHafta, ayEtiket:ayEtiket, donemHaftalari:donemHaftalari,
            KONTROL:KONTROL, kontrol:kontrol, SIMGE:SIMGE, SOSYAL_AD:SOSYAL_AD };
@@ -719,7 +737,7 @@ window.IZLEME = (function(){
 
   <!-- 5. Parti programı ve tüzüğü -->
   <section class="bolum" data-bolum="Parti Belgeleri">
-    <div class="bolum-bas"><h2>Parti Belgeleri</h2><p>Metinler resmî siteden canlı okunur</p></div>
+    <div class="bolum-bas"><h2>Parti Belgeleri</h2><p>Resmî metinler · saadet.org.tr kaynaklı</p></div>
     <div class="belge-kartlar">
       <a class="belge" href="belgeler.html#program"><b>Parti Programı</b><span id="programOzet">Bölümler yükleniyor…</span><em>Programı oku →</em></a>
       <a class="belge" href="belgeler.html#tuzuk"><b>Parti Tüzüğü</b><span id="tuzukOzet">Bölümler yükleniyor…</span><em>Tüzüğü oku →</em></a>
@@ -960,22 +978,22 @@ window.IZLEME = (function(){
     return V.site("saadet_cozer_kategori", { lang:1, include_slug:1 }).then(function(l){
       if (!Array.isArray(l) || !l.length) throw new Error("başlık bulunamadı");
       $("cozer").innerHTML = l.map(function(x, i){ var img = x.resim ? A.SITE_RESIM + "saadet_cozer_k/" + encodeURIComponent(x.resim) : ""; return '<a href="' + esc(A.SITE + "/" + x.kod) + '" target="_blank" rel="noopener"><span class="kucuk"' + (img ? ' style="background-image:url(&quot;' + esc(img) + '&quot;)"' : "") + '></span><span><b>' + esc(V.varlikCoz(x.baslik)) + '</b><small>Başlık ' + (i + 1) + ' / ' + l.length + '</small></span></a>'; }).join("");
-      V.kontrol("cozer", "saadet.org.tr · Saadet Çözer", "ok", l.length + " başlık");
+      V.kontrol("cozer", "Saadet Çözer (sitemizdeki kopya)", "ok", l.length + " başlık");
     }).catch(function(e){
       $("cozer").innerHTML = '<p class="bos-mesaj">Başlıklar alınamadı. <a href="' + esc(B.cozer) + '" target="_blank" rel="noopener">Saadet Çözer ↗</a></p>';
-      V.kontrol("cozer", "saadet.org.tr · Saadet Çözer", "hata", "Okunamadı: " + e.message);
+      V.kontrol("cozer", "Saadet Çözer (sitemizdeki kopya)", "hata", "Okunamadı: " + e.message);
     });
   }
 
   function belgeler(){
     var p = V.site("program_kategori", { lang:1 }).then(function(l){
       $("programOzet").textContent = l.length + " ana bölüm: " + l.slice(0, 3).map(function(x){ return V.varlikCoz(x.baslik); }).join(", ") + "…";
-      V.kontrol("program", "saadet.org.tr · Parti Programı", "ok", l.length + " bölüm");
-    }).catch(function(e){ $("programOzet").textContent = "Bölümler şu an alınamadı."; V.kontrol("program", "saadet.org.tr · Parti Programı", "hata", "Okunamadı: " + e.message); });
+      V.kontrol("program", "Parti Programı (sitemizdeki kopya)", "ok", l.length + " bölüm");
+    }).catch(function(e){ $("programOzet").textContent = "Bölümler şu an alınamadı."; V.kontrol("program", "Parti Programı (sitemizdeki kopya)", "hata", "Okunamadı: " + e.message); });
     var t = V.site("tuzuk_kategori", { lang:1 }).then(function(l){
       $("tuzukOzet").textContent = l.length + " bölüm: " + l.slice(0, 3).map(function(x){ return V.baslikHarf(V.varlikCoz(x.baslik)); }).join(", ") + "…";
-      V.kontrol("tuzuk", "saadet.org.tr · Parti Tüzüğü", "ok", l.length + " bölüm");
-    }).catch(function(e){ $("tuzukOzet").textContent = "Bölümler şu an alınamadı."; V.kontrol("tuzuk", "saadet.org.tr · Parti Tüzüğü", "hata", "Okunamadı: " + e.message); });
+      V.kontrol("tuzuk", "Parti Tüzüğü (sitemizdeki kopya)", "ok", l.length + " bölüm");
+    }).catch(function(e){ $("tuzukOzet").textContent = "Bölümler şu an alınamadı."; V.kontrol("tuzuk", "Parti Tüzüğü (sitemizdeki kopya)", "hata", "Okunamadı: " + e.message); });
     return Promise.all([p, t]);
   }
 

@@ -74,6 +74,7 @@ window.AYAR = {
   /* ---- saadet.org.tr (resmî site) — içerik buradan canlı okunur ---- */
   SITE: "https://www.saadet.org.tr",
   SITE_API: "https://admin.saadet.org.tr/veriler/api.php",
+  BELGE_VERI: "belgeler-veri.json",  // Parti Programı, Tüzük ve Saadet Çözer'in sitemizdeki kopyası
   SITE_RESIM: "https://admin.saadet.org.tr/resimler/",
   IL_ID: 7, /* Antalya plaka kodu — il başkanlığı bilgileri */
   BAGLANTI: {
@@ -190,7 +191,24 @@ window.VERI = (function(){
   }
 
   /* ---- resmî site API ---- */
+  /* Parti Programı, Tüzük ve Saadet Çözer başlıkları sitemizdeki kopyadan (belgeler-veri.json) okunur;
+     kopya okunamazsa saadet.org.tr'den canlı okunur. */
+  var YEREL = { program_kategori:1, tuzuk_kategori:1, program:1, tuzuk:1, saadet_cozer_kategori:1 }, _belge = null;
+  function belge(){
+    if (!_belge) _belge = getir(A.BELGE_VERI + "?_=" + Math.floor(Date.now() / 3600000)).then(function(r){ return r.json(); });
+    return _belge;
+  }
   function site(kaynak, param){
+    if (YEREL[kaynak] && A.BELGE_VERI) {
+      return belge().then(function(b){
+        var v = (kaynak === "program" || kaynak === "tuzuk") ? (b[kaynak] || {})[String((param || {}).kategori)] : b[kaynak];
+        if (!Array.isArray(v) || !v.length) throw new Error("kopyada yok");
+        return v;
+      }).catch(function(){ return canli(kaynak, param); });
+    }
+    return canli(kaynak, param);
+  }
+  function canli(kaynak, param){
     var p = new URLSearchParams(); p.set("resource", kaynak);
     Object.keys(param || {}).forEach(function(k){ p.set(k, param[k]); });
     return getir(A.SITE_API + "?" + p.toString()).then(function(r){ return r.json(); }).then(function(j){
@@ -289,7 +307,7 @@ window.VERI = (function(){
   };
   var SOSYAL_AD = { facebook:"Facebook", x:"X", instagram:"Instagram", youtube:"YouTube", tiktok:"TikTok" };
 
-  return { getir:getir, site:site, varlikCoz:varlikCoz, temizHtml:temizHtml, tarihUnix:tarihUnix, baslikHarf:baslikHarf,
+  return { getir:getir, site:site, belge:belge, varlikCoz:varlikCoz, temizHtml:temizHtml, tarihUnix:tarihUnix, baslikHarf:baslikHarf,
            teskilatKayitlari:teskilatKayitlari, egitimKayitlari:egitimKayitlari, stkKayitlari:stkKayitlari, stkVeri:stkVeri, stkAyar:stkAyar, stkKaydet:stkKaydet,
            haftaKaydir:haftaKaydir, buHafta:buHafta, ayEtiket:ayEtiket, donemHaftalari:donemHaftalari,
            KONTROL:KONTROL, kontrol:kontrol, SIMGE:SIMGE, SOSYAL_AD:SOSYAL_AD };
@@ -513,7 +531,7 @@ window.IZLEME = (function(){
 <header>
   <div class="sar">
     <img src="data:image/png;base64,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" alt="Saadet Partisi Antalya">
-    <div><h1>Parti Belgeleri</h1><p>Saadet Partisi Antalya İl Başkanlığı · metinler saadet.org.tr'den canlı okunur</p></div>
+    <div><h1>Parti Belgeleri</h1><p>Saadet Partisi Antalya İl Başkanlığı · metinler saadet.org.tr kaynaklıdır</p></div>
     <div class="bos"></div>
     <a class="btn" href="index.html">← Ana sayfa</a>
   </div>
