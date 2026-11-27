@@ -64,7 +64,7 @@ function kurulum() {
   klasor_();
   ScriptApp.getProjectTriggers().forEach(function (t) { if (t.getHandlerFunction() === "topla") ScriptApp.deleteTrigger(t); });
   ScriptApp.newTrigger("topla").timeBased().everyHours(1).nearMinute(0).create(); // saat başı (Google ±15 dk oynatabilir)
-  topla(true);
+  bugunuYenile();   // bugünün bültenini baştan toplar
   Logger.log("Kurulum tamam. Son bülten: " + JSON.stringify(oku_("son.json")).slice(0, 300));
 }
 
