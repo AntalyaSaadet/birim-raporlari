@@ -917,6 +917,16 @@ window.IZLEME = (function(){
     return Promise.resolve();
   }
 
+  function sosyalCiz(genel){
+    var eksik = [];
+    var html = ["facebook","x","instagram","youtube","tiktok"].map(function(k){
+      var url = A.SOSYAL[k] || genel[k] || "";
+      if (!url) { eksik.push(V.SOSYAL_AD[k]); return '<a class="eksik" title="' + V.SOSYAL_AD[k] + ' bağlantısı henüz eklenmedi" aria-label="' + V.SOSYAL_AD[k] + ' (bağlantı yok)">' + V.SIMGE[k] + '</a>'; }
+      return '<a href="' + esc(url) + '" target="_blank" rel="noopener" title="' + V.SOSYAL_AD[k] + '" aria-label="' + V.SOSYAL_AD[k] + '">' + V.SIMGE[k] + '</a>';
+    }).join("");
+    ["sosyalUst","sosyalAlt","sosyalIletisim"].forEach(function(id){ $(id).innerHTML = html; });
+    return eksik;
+  }
   function sosyal(){
     var eksik = sosyalCiz({});
     var antalya = Object.keys(A.SOSYAL).filter(function(k){ return A.SOSYAL[k]; });
