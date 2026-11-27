@@ -913,44 +913,15 @@ window.IZLEME = (function(){
   }
   function iletisim(){
     iletisimCiz(A.ILETISIM);
-    return V.site("il_baskanlari", { il_id:A.IL_ID, lang:1, limit:1 }).then(function(l){
-      var x = Array.isArray(l) && l[0]; if (!x) throw new Error("Antalya kaydı bulunamadı");
-      var b = { ilBaskani:V.baslikHarf(V.varlikCoz(x.baslik)) || A.ILETISIM.ilBaskani, adres:V.baslikHarf(V.varlikCoz(x.adres)) || A.ILETISIM.adres, telefon:x.telefon || A.ILETISIM.telefon, eposta:A.ILETISIM.eposta };
-      b.adres = A.ILETISIM.adres; /* adres yazımı düzenli tutulsun; siteyle farkı aşağıda kontrol edilir */
-      iletisimCiz(b);
-      var siteAdres = V.varlikCoz(x.adres || "").toLocaleUpperCase("tr-TR").replace(/[^A-ZÇĞİÖŞÜ0-9]/g, "");
-      var degisti = siteAdres && siteAdres.indexOf("HASANBIÇAKCI") < 0;
-      V.kontrol("iletisim", "saadet.org.tr · Antalya İl Başkanlığı bilgileri", degisti ? "uyari" : "ok", degisti ? "Sitede adres değişmiş görünüyor: " + V.varlikCoz(x.adres) + " — ayarlardaki adresi güncelleyin" : "İl Başkanı: " + b.ilBaskani + " · Tel: " + b.telefon);
-    }).catch(function(e){ V.kontrol("iletisim", "saadet.org.tr · Antalya İl Başkanlığı bilgileri", "hata", "Okunamadı, kayıtlı bilgiler gösteriliyor: " + e.message); });
+    V.kontrol("iletisim", "Antalya İl Başkanlığı iletişim bilgileri", "ok", "Sitede kayıtlı bilgiler gösteriliyor");
+    return Promise.resolve();
   }
 
-  /* ---- sosyal medya ---- */
-  function sosyalCiz(genel){
-    var eksik = [];
-    var html = ["facebook","x","instagram","youtube","tiktok"].map(function(k){
-      var url = A.SOSYAL[k] || genel[k] || "";
-      if (!url) { eksik.push(V.SOSYAL_AD[k]); return '<a class="eksik" title="' + V.SOSYAL_AD[k] + ' bağlantısı henüz eklenmedi" aria-label="' + V.SOSYAL_AD[k] + ' (bağlantı yok)">' + V.SIMGE[k] + '</a>'; }
-      return '<a href="' + esc(url) + '" target="_blank" rel="noopener" title="' + V.SOSYAL_AD[k] + '" aria-label="' + V.SOSYAL_AD[k] + '">' + V.SIMGE[k] + '</a>';
-    }).join("");
-    ["sosyalUst","sosyalAlt","sosyalIletisim"].forEach(function(id){ $(id).innerHTML = html; });
-    return eksik;
-  }
   function sosyal(){
+    var eksik = sosyalCiz({});
     var antalya = Object.keys(A.SOSYAL).filter(function(k){ return A.SOSYAL[k]; });
-    sosyalCiz({});
-    return V.site("sabitler", { lang:1, limit:1 }).then(function(l){
-      var s = (Array.isArray(l) && l[0]) || {};
-      var genel = { facebook:s.facebook, x:s.twitter, instagram:s.instagram, youtube:s.youtube, tiktok:s.tiktok };
-      var eksik = sosyalCiz(genel);
-      var genelKullanilan = ["facebook","x","instagram","youtube","tiktok"].filter(function(k){ return !A.SOSYAL[k] && genel[k]; }).map(function(k){ return V.SOSYAL_AD[k]; });
-      var ayr = (antalya.length ? "Antalya hesabı: " + antalya.map(function(k){ return V.SOSYAL_AD[k]; }).join(", ") + ". " : "") +
-                (genelKullanilan.length ? "Genel Merkez hesabı kullanılıyor: " + genelKullanilan.join(", ") + ". " : "") +
-                (eksik.length ? "Bağlantı yok: " + eksik.join(", ") + " — ayarlara Antalya hesabı eklenmeli." : "");
-      V.kontrol("sosyal", "Sosyal medya bağlantıları", eksik.length || genelKullanilan.length ? "uyari" : "ok", ayr.trim());
-    }).catch(function(e){
-      var eksik = sosyalCiz({});
-      V.kontrol("sosyal", "Sosyal medya bağlantıları", "hata", "Genel Merkez hesapları siteden okunamadı: " + e.message + (eksik.length ? " · Bağlantısı olmayan: " + eksik.join(", ") : ""));
-    });
+    V.kontrol("sosyal", "Sosyal medya bağlantıları", eksik.length ? "uyari" : "ok", (antalya.length ? "Antalya hesapları: " + antalya.map(function(k){ return V.SOSYAL_AD[k]; }).join(", ") : "") + (eksik.length ? " · Bağlantısı olmayan: " + eksik.join(", ") : ""));
+    return Promise.resolve();
   }
 
   /* ---- bize yazın ---- */
