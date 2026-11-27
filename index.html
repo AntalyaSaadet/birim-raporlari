@@ -1011,9 +1011,18 @@ window.IZLEME = (function(){
   }
   /* her sütunda tam 5 haber görünsün, kalanı kaydırılsın */
   function bultenYukseklik(){
-    $("bulten").querySelectorAll(".kaydir").forEach(function(k){
-      var o = k.children; k.style.maxHeight = "none";
-      if (o.length > 5) { var son = o[4]; k.style.maxHeight = (son.offsetTop + son.offsetHeight + 2) + "px"; }
+    var kl = Array.prototype.slice.call($("bulten").querySelectorAll(".kaydir")); if (!kl.length) return;
+    kl.forEach(function(k){ k.style.maxHeight = "none"; k.style.height = ""; });
+    var tek = window.matchMedia("(max-width:760px)").matches, en = 0;
+    var hesap = kl.map(function(k){
+      var o = k.children, ust = k.getBoundingClientRect().top;
+      var y = o.length ? o[Math.min(4, o.length - 1)].getBoundingClientRect().bottom - ust + 2 : 0;
+      en = Math.max(en, y); return y;
+    });
+    kl.forEach(function(k, i){
+      var y = tek ? hesap[i] : en;   // geniş ekranda üç sütun eşit yükseklikte
+      if (k.children.length > 5 || !tek) k.style.height = Math.ceil(y) + "px";
+      k.style.maxHeight = Math.ceil(y) + "px";
     });
   }
   window.addEventListener("resize", function(){ clearTimeout(bultenYukseklik.z); bultenYukseklik.z = setTimeout(bultenYukseklik, 150); });
