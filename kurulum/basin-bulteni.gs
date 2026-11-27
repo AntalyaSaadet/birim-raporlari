@@ -109,7 +109,7 @@ function topla(zorla) {
       var k = anahtar_(a.baslik);
       if (!k || gorulen[k] || gorulen[a.url]) return;
       gorulen[k] = 1; gorulen[a.url] = 1;
-      yeni.push({ baslik: a.baslik, ozet: "", mecralar: [{ ad: a.kaynak, url: a.url, zaman: Utilities.formatDate(new Date(a.t), TZ, "dd.MM.yyyy, HH.mm") }], eklenme: eklenme });
+      yeni.push({ baslik: a.baslik, ozet: "", mecralar: [{ ad: a.kaynak, site: a.site, url: a.url, zaman: Utilities.formatDate(new Date(a.t), TZ, "dd.MM.yyyy, HH.mm") }], eklenme: eklenme });
     });
     bl.haberler = yeni.concat(bl.haberler || []).slice(0, tanim.sinir);
   });
@@ -137,9 +137,11 @@ function rss_(q) {
     var kanal = XmlService.parse(r.getContentText()).getRootElement().getChild("channel");
     return kanal.getChildren("item").map(function (it) {
       var kaynak = it.getChildText("source") || "";
+      var kEl = it.getChild("source"), kUrl = "";
+      try { kUrl = kEl && kEl.getAttribute("url") ? kEl.getAttribute("url").getValue() : ""; } catch (x) {}
       var baslik = (it.getChildText("title") || "").trim();
       if (kaynak && baslik.slice(-(kaynak.length + 3)) === " - " + kaynak) baslik = baslik.slice(0, -(kaynak.length + 3)).trim();
-      return { baslik: baslik, kaynak: kaynak || "Google Haberler", url: it.getChildText("link") || "", t: new Date(it.getChildText("pubDate")).getTime() || 0 };
+      return { baslik: baslik, kaynak: kaynak || "Google Haberler", site: kUrl, url: it.getChildText("link") || "", t: new Date(it.getChildText("pubDate")).getTime() || 0 };
     }).filter(function (x) { return x.baslik && x.url && x.t; });
   } catch (e) { return []; }
 }

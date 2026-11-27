@@ -562,23 +562,36 @@ window.IZLEME = (function(){
   .haber .tarih{font-size:12px;color:var(--soluk)}
   .haber .baslik{font-weight:700;margin-top:3px;line-height:1.35}
   .gundem .haberler .haber{flex:1 1 220px}
-  .bulten-kap{flex:1;position:relative;min-height:520px}
-  .bulten{position:absolute;inset:0;display:flex;flex-direction:column;padding:0;overflow:hidden}
-  .bulten .ust{padding:13px 16px;border-bottom:1px solid var(--cizgi);display:flex;flex-direction:column;gap:5px;background:#fcfbf9;border-radius:12px 12px 0 0}
-  .bulten .ust b{font-size:15px}
+  .bulten{padding:0;overflow:hidden}
+  .bulten .ust{padding:11px 16px;border-bottom:1px solid var(--cizgi);display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#fcfbf9}
+  .bulten .canli{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:800;letter-spacing:.8px;color:var(--kirmizi-k)}
+  .bulten .canli i{width:8px;height:8px;border-radius:50%;background:var(--kirmizi);animation:nabiz 1.6s infinite}
+  @keyframes nabiz{0%{box-shadow:0 0 0 0 rgba(205,39,45,.5)}70%{box-shadow:0 0 0 7px rgba(205,39,45,0)}100%{box-shadow:0 0 0 0 rgba(205,39,45,0)}}
+  @media (prefers-reduced-motion:reduce){ .bulten .canli i{animation:none} }
   .bulten .meta{font-size:12.5px;color:var(--soluk)}
-  .bulten .eylem{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:3px}
-  .bulten .eylem select{min-width:0;padding:6px 8px;font-size:13px}
-  .bulten .liste{flex:1;overflow:auto;padding:4px 16px 14px;min-height:0}
-  .bulten h3{font-size:11.5px;letter-spacing:.6px;color:var(--kirmizi-k);margin:14px 0 2px;text-transform:uppercase}
-  .bulten .oge{padding:8px 0;border-bottom:1px solid var(--cizgi2)}
-  .bulten .oge a{text-decoration:none;font-weight:700;font-size:13.5px;line-height:1.35}
-  .bulten .oge a:hover{color:var(--kirmizi-k);text-decoration:underline}
-  .bulten .oge small{display:block;color:var(--soluk);font-size:12px;margin-top:2px}
-  .bulten .yeni{background:var(--iyi-a);color:var(--iyi);font-size:10.5px;font-weight:800;padding:1px 7px;border-radius:8px;margin-left:6px;vertical-align:middle;white-space:nowrap}
-  .bulten .one{background:var(--kirmizi-a);border-radius:9px;padding:9px 12px;margin-top:12px;font-size:13px}
+  .bulten .izgara{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .bulten .bolum-h{padding:12px 16px 14px;border-bottom:1px solid var(--cizgi2);min-width:0}
+  .bulten .izgara .bolum-h:nth-child(odd){border-right:1px solid var(--cizgi2)}
+  .bulten h3{font-size:12px;letter-spacing:.7px;color:var(--kirmizi-k);margin:0 0 8px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+  .bulten h3::before{content:"";width:4px;height:14px;background:var(--kirmizi);border-radius:2px}
+  .bulten h3 small{color:var(--soluk);font-weight:600;letter-spacing:0;text-transform:none}
+  .bulten .haber-k{display:flex;gap:11px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--cizgi2);text-decoration:none;color:inherit}
+  .bulten .haber-k:first-of-type{border-top:0}
+  .bulten .haber-k:hover .hb{color:var(--kirmizi-k);text-decoration:underline}
+  .bulten .logo{flex:0 0 44px;width:44px;height:44px;border-radius:9px;background:#fff;border:1px solid var(--cizgi);display:flex;align-items:center;justify-content:center;overflow:hidden;font-weight:800;font-size:15px;color:#fff}
+  .bulten .logo img{width:28px;height:28px;object-fit:contain}
+  .bulten .manset .logo{flex-basis:64px;width:64px;height:64px;border-radius:12px}
+  .bulten .manset .logo img{width:40px;height:40px}
+  .bulten .hb{font-weight:700;font-size:13.5px;line-height:1.38;display:block}
+  .bulten .manset .hb{font-size:15.5px;line-height:1.35}
+  .bulten .alt{display:block;color:var(--soluk);font-size:12px;margin-top:3px}
+  .bulten .alt b{color:var(--yazi2);font-weight:700}
+  .bulten .yeni{background:var(--iyi-a);color:var(--iyi);font-size:10.5px;font-weight:800;padding:1px 7px;border-radius:8px;margin-left:6px;white-space:nowrap}
+  .bulten .daha{font:inherit;font-size:12.5px;font-weight:700;color:var(--kirmizi-k);background:none;border:0;padding:6px 0 0;cursor:pointer}
+  .bulten .one{background:var(--kirmizi-a);border-radius:9px;padding:9px 12px;margin:12px 16px 0;font-size:13px}
   .bulten .one b{font-size:12px;letter-spacing:.4px;color:var(--kirmizi-k);text-transform:uppercase}
   .bulten .one ul{margin:4px 0 0;padding-left:18px}
+  @media (max-width:760px){ .bulten .izgara{grid-template-columns:1fr} .bulten .izgara .bolum-h:nth-child(odd){border-right:0} }
   .kart.iletisim{display:flex;flex-direction:column}
   .harita{flex:1;min-height:240px;margin-top:14px;border-radius:10px;overflow:hidden;border:1px solid var(--cizgi);background:#eee9e3}
   .harita iframe{width:100%;height:100%;min-height:240px;border:0;display:block}
@@ -708,7 +721,7 @@ window.IZLEME = (function(){
   <!-- 3. Günlük basın bülteni -->
   <section class="bolum gundem" data-bolum="Günlük Basın Bülteni">
     <div class="bolum-bas"><h2>Günlük Basın Bülteni</h2><p>Saadet Partisi ve Antalya basın takibi · saat başı güncellenir</p></div>
-    <div class="bulten-kap"><div class="kart bulten" id="bulten" aria-live="polite"><div class="liste"><p class="yukleniyor">Bülten yükleniyor…</p></div></div></div>
+    <div class="kart bulten" id="bulten" aria-live="polite"><p class="yukleniyor" style="padding:16px">Bülten yükleniyor…</p></div>
   </section>
 
   <!-- 4. Siyasette Ahlak Devrimi -->
@@ -981,39 +994,51 @@ window.IZLEME = (function(){
     return V.getir(url, A.BULTEN_API ? {} : { cache:"no-store" }).then(function(r){ return r.json(); }).then(function(j){ if (j && j.hata) throw new Error(j.hata === "yok" ? "404" : j.hata); return j; });
   }
   function saatYaz(iso){ var d = new Date(iso); return isNaN(d) ? "" : O.pad(d.getHours()) + "." + O.pad(d.getMinutes()); }
-  function bultenCiz(b, guncel){
-    var h = '<div class="ust"><b>' + esc(b.tarih || b.gun) + '</b><span class="meta">Tarama: ' + esc(b.donem || "") + (guncel && b.guncelleme ? ' · Son güncelleme ' + saatYaz(b.guncelleme) : '') + '</span><div class="eylem">' +
-      (b.pdf ? '<a class="btn kirmizi" href="' + esc(A.BULTEN_KLASOR + b.pdf) + '" target="_blank" rel="noopener">PDF bülten ↗</a>' : '') +
-      '<select id="bultenArsiv" aria-label="Önceki bültenler"></select></div></div><div class="liste">';
+  var RENK = ["#cd272d","#2a6f97","#3d7a45","#8a5a2b","#6b3fa0","#b0413e","#1f7a7a","#7a6a1f"];
+  function zamanCoz(z){ var m = /(\d{2})\.(\d{2})\.(\d{4}),\s*(\d{2})\.(\d{2})/.exec(z || ""); return m ? new Date(+m[3], +m[2] - 1, +m[1], +m[4], +m[5]) : null; }
+  function once(z){
+    var d = zamanCoz(z); if (!d) return z || "";
+    var dk = Math.round((Date.now() - d) / 60000);
+    if (dk < 1) return "az önce"; if (dk < 60) return dk + " dk önce";
+    var sa = Math.floor(dk / 60); if (sa < 24) return sa + " saat önce";
+    return O.pad(d.getDate()) + "." + O.pad(d.getMonth() + 1) + " " + O.pad(d.getHours()) + "." + O.pad(d.getMinutes());
+  }
+  function logo(m){
+    var ad = (m && m.ad) || "?", dom = "";
+    try { dom = m && m.site ? new URL(m.site).hostname.replace(/^www\./, "") : ""; } catch(e){}
+    var harf = ad.replace(/[^A-Za-zÇĞİÖŞÜçğıöşü0-9]/g, "").slice(0, 2).toLocaleUpperCase("tr-TR") || "?";
+    var renk = RENK[Array.prototype.reduce.call(ad, function(t, c){ return t + c.charCodeAt(0); }, 0) % RENK.length];
+    var yedek = '<span class="logo" style="background:' + renk + ';border-color:' + renk + '">' + esc(harf) + '</span>';
+    if (!dom) return yedek;
+    return '<span class="logo" data-harf="' + esc(harf) + '" data-renk="' + renk + '"><img src="https://www.google.com/s2/favicons?domain=' + encodeURIComponent(dom) + '&sz=128" alt="" loading="lazy" referrerpolicy="no-referrer"></span>';
+  }
+  var BLT_ACIK = {};
+  function bultenCiz(b){
+    var adet = (b.bolumler || []).reduce(function(n, x){ return n + (x.haberler || []).length; }, 0);
+    var h = '<div class="ust"><span class="canli"><i></i>CANLI</span><span class="meta">' + esc(b.tarih || b.gun) + (b.guncelleme ? ' · son güncelleme ' + saatYaz(b.guncelleme) : '') + ' · ' + adet + ' haber · saat başı yenilenir</span></div>';
     if (b.one_cikanlar && b.one_cikanlar.length) h += '<div class="one"><b>Günün öne çıkanları</b><ul>' + b.one_cikanlar.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join("") + '</ul></div>';
-    var adet = 0;
-    (b.bolumler || []).forEach(function(bl){
-      var hs = bl.haberler || []; if (!hs.length) return;
-      h += '<h3>' + esc(bl.baslik) + '</h3>';
-      hs.forEach(function(x){
-        adet++;
-        var m = (x.mecralar || []), url = (m.filter(function(y){ return y.url; })[0] || {}).url;
-        var bas = esc(x.baslik);
-        h += '<div class="oge">' + (url ? '<a href="' + esc(url) + '" target="_blank" rel="noopener">' + bas + '</a>' : '<b>' + bas + '</b>') +
-          (guncel && x.eklenme && x.eklenme !== "08.00" ? '<span class="yeni">YENİ · ' + esc(x.eklenme) + '</span>' : '') +
-          '<small>' + esc(m.map(function(y){ return y.ad; }).filter(Boolean).join(" · ")) + (m[0] && m[0].zaman ? " · " + esc(m[0].zaman) : "") + '</small></div>';
+    var bolumler = (b.bolumler || []).filter(function(bl){ return (bl.haberler || []).length; });
+    h += '<div class="izgara">';
+    bolumler.forEach(function(bl, bi){
+      var hs = bl.haberler, acik = BLT_ACIK[bl.baslik], gos = acik ? hs : hs.slice(0, 5);
+      h += '<div class="bolum-h"><h3>' + esc(bl.baslik) + ' <small>' + hs.length + ' haber</small></h3>';
+      gos.forEach(function(x, i){
+        var m = x.mecralar || [], ilk = m[0] || {}, url = (m.filter(function(y){ return y.url; })[0] || {}).url;
+        var ic = logo(ilk) + '<span><span class="hb">' + esc(x.baslik) + (x.eklenme && x.eklenme !== "08.00" && zamanCoz(ilk.zaman) && (Date.now() - zamanCoz(ilk.zaman)) < 3 * 3600000 ? '<span class="yeni">YENİ</span>' : '') + '</span>' +
+          '<span class="alt"><b>' + esc(m.map(function(y){ return y.ad; }).filter(Boolean).join(" · ")) + '</b>' + (ilk.zaman ? ' · ' + esc(once(ilk.zaman)) : '') + '</span></span>';
+        h += url ? '<a class="haber-k' + (i === 0 ? ' manset' : '') + '" href="' + esc(url) + '" target="_blank" rel="noopener">' + ic + '</a>' : '<div class="haber-k' + (i === 0 ? ' manset' : '') + '">' + ic + '</div>';
       });
+      if (hs.length > 5) h += '<button type="button" class="daha" data-b="' + esc(bl.baslik) + '">' + (acik ? 'Daha az göster ▲' : '+' + (hs.length - 5) + ' haber daha ▼') + '</button>';
+      h += '</div>';
     });
-    if (!adet) h += '<p class="bos-mesaj" style="padding-top:12px">Bu bültende haber yok.</p>';
     h += '</div>';
+    if (!adet) h += '<p class="bos-mesaj" style="padding:14px 16px">Henüz haber yok. Haberler saat başı burada güncellenir.</p>';
     $("bulten").innerHTML = h;
-    var s = $("bultenArsiv"), gunler = [];
-    if (BLT.son) gunler.push({ gun:BLT.son.gun, ad:"Bugün · " + (BLT.son.tarih || BLT.son.gun) });
-    BLT.arsiv.forEach(function(a){ if (!BLT.son || a.gun !== BLT.son.gun) gunler.push({ gun:a.gun, ad:a.tarih || a.gun }); });
-    s.innerHTML = gunler.length ? gunler.map(function(g){ return '<option value="' + esc(g.gun) + '"' + (g.gun === b.gun ? ' selected' : '') + '>' + esc(g.ad) + '</option>'; }).join("") : '<option>Arşiv yok</option>';
-    s.disabled = gunler.length < 2;
-    s.onchange = function(){
-      var g = s.value; BLT.secili = g;
-      if (BLT.son && g === BLT.son.gun) return bultenCiz(BLT.son, true);
-      var a = BLT.arsiv.filter(function(x){ return x.gun === g; })[0]; if (!a) return;
-      if (BLT.cache[g]) return bultenCiz(BLT.cache[g], false);
-      bultenGetir(a.json).then(function(v){ BLT.cache[g] = v; if (BLT.secili === g) bultenCiz(v, false); }).catch(function(){ $("bulten").querySelector(".liste").innerHTML = '<p class="bos-mesaj" style="padding-top:12px">Bu günün bülteni açılamadı.</p>'; });
-    };
+    $("bulten").querySelectorAll(".logo img").forEach(function(img){
+      img.onerror = function(){ var s = img.parentNode; s.style.background = s.dataset.renk; s.style.borderColor = s.dataset.renk; s.textContent = s.dataset.harf; };
+      img.onload = function(){ if (img.naturalWidth <= 16) img.onerror(); };
+    });
+    $("bulten").querySelectorAll(".daha").forEach(function(d){ d.onclick = function(){ BLT_ACIK[d.dataset.b] = !BLT_ACIK[d.dataset.b]; bultenCiz(b); }; });
   }
   function bultenKontrol(b){
     var simdi = new Date(), bugun = O.ymd(simdi), saat = simdi.getHours() + simdi.getMinutes() / 60, ad = "Günlük Basın Bülteni (Google Haberler servisi)";
@@ -1029,16 +1054,14 @@ window.IZLEME = (function(){
   }
   function bulten(){
     return bultenGetir("son.json").then(function(b){
-      BLT.son = b;
-      if (!BLT.secili || BLT.secili === b.gun) bultenCiz(b, true);
-      bultenKontrol(b);
-      return bultenGetir("arsiv.json").then(function(l){ BLT.arsiv = Array.isArray(l) ? l : []; if (!BLT.secili || BLT.secili === b.gun) bultenCiz(b, true); }).catch(function(){});
+      BLT.son = b; bultenCiz(b); bultenKontrol(b);
     }).catch(function(e){
       var yok = /404/.test(e.message);
-      $("bulten").innerHTML = '<div class="liste"><p class="bos-mesaj" style="padding-top:14px">' + (yok ? 'Bülten henüz yayınlanmadı. Haberler 08.00–23.00 arasında saat başı burada güncellenir.' : 'Bülten şu an okunamadı.') + '</p></div>';
-      V.kontrol("bulten", "Günlük Basın Bülteni (Google Haberler servisi)", yok ? "uyari" : "hata", yok ? "Henüz yayınlanmış bülten yok (bulten/son.json bulunamadı)" : "Okunamadı: " + e.message);
+      $("bulten").innerHTML = '<p class="bos-mesaj" style="padding:14px 16px">' + (yok ? 'Bülten henüz yayınlanmadı. Haberler 08.00–23.00 arasında saat başı burada güncellenir.' : 'Bülten şu an okunamadı.') + '</p>';
+      V.kontrol("bulten", "Günlük Basın Bülteni (Google Haberler servisi)", yok ? "uyari" : "hata", yok ? "Henüz yayınlanmış bülten yok" : "Okunamadı: " + e.message);
     });
   }
+  setInterval(bulten, 10 * 60 * 1000);   // anlık akış: 10 dakikada bir yeniden okunur
 
   function hepsi(){
     raporlariYukle(); iletisim(); sosyal(); bizeYazinKontrol(); bulten();
